@@ -30,14 +30,15 @@
             background-color: var(--bg-base);
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
+            flex-direction: row; /* Default split desktop panel */
             overflow: hidden;
             letter-spacing: -0.2px;
         }
 
         /* ==========================================================================
-           LEFT ARCHITECTURE: INTERACTIVE PANEL COMPONENT
+           LEFT SIDEBAR CONTROL PANELS
            ========================================================================== */
         .sidebar-control-panel {
             width: 420px;
@@ -52,9 +53,10 @@
             gap: 24px;
             box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
             z-index: 5;
+            overflow-y: auto;
         }
 
-        /* Document Format Toggle Switcher */
+        /* Mode Format Button Layout Switches */
         .mode-row-switchers {
             display: flex;
             background: var(--input-bg);
@@ -88,7 +90,7 @@
             box-shadow: 0 4px 12px rgba(140, 70, 255, 0.2);
         }
 
-        /* Integrated Form Row Configuration */
+        /* Field Submission Row Elements Grid */
         .interactive-form-grid {
             display: flex;
             background: var(--input-bg);
@@ -98,6 +100,7 @@
             align-items: center;
             height: 52px;
             transition: var(--transition-smooth);
+            min-height: 52px;
         }
         .interactive-form-grid:focus-within {
             border-color: var(--candy-violet-accent);
@@ -112,6 +115,7 @@
             color: var(--text-main);
             font-size: 14px;
             font-family: monospace;
+            width: 50%;
         }
         .input-placeholder-field::placeholder { color: var(--text-muted); opacity: 0.4; }
 
@@ -131,7 +135,7 @@
         .action-submit-btn:hover:not(:disabled) { opacity: 0.95; }
         .action-submit-btn:disabled { background: #221736; color: #574b6e; cursor: not-allowed; }
 
-        /* Drag & Drop Local Files Area Container */
+        /* Uploader Drag Drop Segment Area Box */
         .dropzone-file-area {
             border: 2px dashed var(--border-glow);
             background: rgba(21, 11, 38, 0.25);
@@ -150,8 +154,8 @@
         }
         .dropzone-file-area span { color: var(--candy-violet-accent); font-weight: 600; }
 
-        /* Workspace Monitoring Queue Display List */
-        .queue-monitor-container { display: none; margin-top: 10px; }
+        /* Workspace Core Pipeline Monitoring Queue */
+        .queue-monitor-container { display: none; margin-top: 4px; }
         .queue-header-line { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .clear-queue-action { background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 11px; font-weight: 600; transition: var(--transition-smooth); }
         .clear-queue-action:hover { opacity: 0.8; }
@@ -186,12 +190,12 @@
             transition: var(--transition-smooth);
         }
 
-        /* Sheet Data Segments */
+        /* Render Sheets Internal Segments Elements */
         .file-block-segment { border-bottom: 1px solid #eef0f4; padding-bottom: 36px; margin-bottom: 36px; }
         .file-block-segment:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .segment-top-row { border-bottom: 2px solid #000000; padding-bottom: 6px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .segment-title-text { font-weight: 800; font-size: 14px; font-family: monospace; }
-        .segment-meta-badge { font-weight: 600; font-size: 10px; text-transform: uppercase; color: #666666; }
+        .segment-top-row { border-bottom: 2px solid #000000; padding-bottom: 6px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+        .segment-title-text { font-weight: 800; font-size: 14px; font-family: monospace; word-break: break-all; }
+        .segment-meta-badge { font-weight: 600; font-size: 10px; text-transform: uppercase; color: #666666; white-space: nowrap; }
 
         pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
         code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.5px; line-height: 1.6; }
@@ -199,16 +203,13 @@
         /* ==========================================================================
            OUTPUT SCHEMES & SYNTAX CONFIGURATIONS
            ========================================================================== */
-        
-        /* 1. Normal Doc Overrides */
         body.normal-doc-active .canvas-sheet-printout { background: #ffffff !important; }
         body.normal-doc-active .segment-top-row { border-color: #000000 !important; color: #000000 !important; }
         body.normal-doc-active .segment-title-text, body.normal-doc-active .segment-meta-badge { color: #000000 !important; }
         body.normal-doc-active code, body.normal-doc-active pre, body.normal-doc-active code[class*="language-"] { color: #000000 !important; font-weight: 400 !important; }
         body.normal-doc-active span { color: #000000 !important; font-weight: 400 !important; background: none !important; }
 
-        /* 2. IDE Screenshot Scheme Overrides */
-        body.ide-style-active .preview-matrix-viewport { background: #000000 !important; padding: 40px; }
+        body.ide-style-active .preview-matrix-viewport { background: #000000 !important; }
         body.ide-style-active .canvas-sheet-printout { 
             background: #000000 !important; 
             border: 1px solid var(--border-glow); 
@@ -219,7 +220,7 @@
         body.ide-style-active .segment-title-text { color: #ffffff !important; }
         body.ide-style-active .segment-meta-badge { color: var(--text-muted) !important; }
 
-        /* Immersive IDE Mode Syntax Tokens coloration mapping */
+        /* Immersive IDE Mode Syntax Highlight Colors Mapping Tokens */
         body.ide-style-active code[class*="language-"], body.ide-style-active pre[class*="language-"] { color: #e2daeb; }
         body.ide-style-active .token.string { color: #ca9eff; } 
         body.ide-style-active .token.keyword { color: #df72ff; font-weight: 600; } 
@@ -229,16 +230,54 @@
         body.ide-style-active .token.property, body.ide-style-active .token.class-name { color: #ffd966; }
 
         /* ==========================================================================
-           SYSTEM EXPORT PRINT GRAPHICS ENGINE OVERRIDES
+           RESPONSIVE RE-ORDER OVERRIDES: MOBILE GRAPHICS PORT MEDIA ENGINE
+           ========================================================================== */
+        @media (max-width: 992px) {
+            body {
+                flex-direction: column; /* Stacks components cleanly vertically on mobile viewport widths */
+                overflow-y: auto;
+                height: auto;
+            }
+
+            .sidebar-control-panel {
+                width: 100%;
+                min-width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-glow);
+                padding: 30px 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                overflow-y: visible;
+            }
+
+            .preview-matrix-viewport {
+                width: 100%;
+                height: auto;
+                overflow-y: visible;
+                padding: 30px 16px;
+            }
+
+            .canvas-sheet-printout {
+                padding: 30px 20px;
+                border-radius: 8px;
+            }
+            
+            body.ide-style-active .preview-matrix-viewport {
+                padding: 20px 10px;
+            }
+        }
+
+        /* ==========================================================================
+           SYSTEM EXPORT PRINT ENGINE HARDWARE CONFIGS
            ========================================================================== */
         @media print {
             .no-print { display: none !important; }
             body { background: #ffffff !important; display: block; overflow: visible; height: auto; }
-            .preview-matrix-viewport { padding: 0; display: block; height: auto; overflow: visible; background: none !important; }
+            .preview-matrix-viewport { padding: 0 !important; display: block; height: auto; overflow: visible; background: none !important; }
             .canvas-sheet-printout { display: block !important; border: none !important; padding: 0; box-shadow: none !important; border-radius: 0; max-width: 100%; }
             .file-block-segment { page-break-after: always; padding: 20px; border: none !important; }
             
-            /* FORCE PURE CRYSTAL BLACK PRINTS: Overwrite any library inline-styles or subtle grays */
+            /* FORCE PURE CRYSTAL BLACK TEXT OUTPUT: Strict Contrast Enforcements */
             body.normal-doc-active .canvas-sheet-printout,
             body.normal-doc-active .canvas-sheet-printout *,
             body.normal-doc-active .file-block-segment * {
@@ -246,13 +285,11 @@
                 -webkit-text-fill-color: #000000 !important;
                 text-shadow: none !important;
                 background: transparent !important;
-                font-weight: 600 !important; /* Thickens text layout structure for matrix paper contrast */
+                font-weight: 600 !important; 
             }
-            body.normal-doc-active .segment-top-row {
-                border-color: #000000 !important;
-            }
+            body.normal-doc-active .segment-top-row { border-color: #000000 !important; }
 
-            /* IDE Canvas Style Screenshot print settings preserving dark engine background fields */
+            /* IDE Canvas Style Dynamic dark screenshot layout engine prints preserving black profiles */
             body.ide-style-active .canvas-sheet-printout { background: #000000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body.ide-style-active .canvas-sheet-printout * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
@@ -276,7 +313,7 @@
 
         <div class="dropzone-file-area" id="dropzone">
             <input type="file" id="fileInput" multiple accept=".html,.css,.js,.py" style="display: none;">
-            Drop components here or <span>browse files</span>
+            Drop files here or <span>browse local directory</span>
         </div>
 
         <div class="queue-monitor-container" id="queueWrapper">
@@ -308,7 +345,7 @@
 
         let processingQueue = [];
 
-        // Dynamic State Processing Controls: Format Structural Layout Router Parameters
+        // Workspace Rendering Style Target Router Switching Functions
         docModeBtns.forEach(button => {
             button.addEventListener('click', () => {
                 const mode = button.getAttribute('data-doc-mode');
@@ -322,7 +359,7 @@
             });
         });
 
-        // Trigger Drag & Drop Window Operations Listeners
+        // Trigger Local Window Native Directory Interaction Systems
         dropzone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (event) => extractSelectedFiles(event.target.files));
         
@@ -349,7 +386,7 @@
             synchronizeWorkspaceUI();
         }
 
-        // Logic Content Filters: Discard comments safely across script environments
+        // Processing Logic Filters: Truncate lines containing standard single or multi-line environment comments
         function removeSourceComments(sourceCode, fileType) {
             if (fileType === 'py') {
                 return sourceCode.replace(/#(?!([^'"]*['"][^'"]*['"])*[^'"]*$)[^\n]*|#[^\n]*/g, '');
@@ -368,7 +405,7 @@
                 sheetOutputMatrix.style.display = "block";
                 compileExecuteBtn.disabled = false;
 
-                // Build Canvas Render Sheets Segment Elements
+                // Virtual Matrix DOM Template Assembler Engine Map Block Layout Routine
                 sheetOutputMatrix.innerHTML = processingQueue.map(item => {
                     const renderingLang = queryTokenMapping(item.extension);
                     return `
@@ -405,7 +442,7 @@
             return textRaw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Trigger Complete File Build System Request Pipeline Execution
+        // Trigger Dynamic Hardware Target Export Compilation Request Pipelines
         compileExecuteBtn.addEventListener('click', () => { 
             const exportTitle = pdfNameInput.value.trim() || "project_submission";
             document.title = exportTitle;
