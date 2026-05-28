@@ -1,1 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiler Framework Workspace</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
+    <style>
+        :root {
+            /* Premium Candy Violet Color Map (Dark Mode Only) */
+            --bg-base: #0c061a;
+            --candy-violet-accent: #bd73ff;
+            --candy-violet-grad: linear-gradient(90deg, #df72ff 0%, #8c46ff 100%);
+            --border-glow: #241442;
+            --text-main: #ffffff;
+            --text-muted: #a593bf;
+            --input-bg: #150b26;
+            --card-glass: rgba(21, 11, 38, 0.55);
+
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Basic Layout Resets */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            letter-spacing: -0.2px;
+        }
+
+        /* ==========================================================================
+           LEFT ARCHITECTURE: INTERACTIVE PANEL COMPONENT
+           ========================================================================== */
+        .sidebar-control-panel {
+            width: 420px;
+            min-width: 420px;
+            background: var(--card-glass);
+            border-right: 1px solid var(--border-glow);
+            padding: 40px 30px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+        }
+
+        /* Document Format Toggle Switcher */
+        .mode-row-switchers {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            padding: 4px;
+        }
+        .doc-format-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .doc-format-btn:hover { color: var(--text-main); }
+        
+        body.normal-doc-active .doc-format-btn[data-doc-mode="normal"],
+        body.ide-style-active .doc-format-btn[data-doc-mode="ide"] {
+            background: var(--candy-violet-grad);
+            color: #000000;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(140, 70, 255, 0.2);
+        }
+
+        /* Integrated Form Row Configuration */
+        .interactive-form-grid {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            overflow: hidden;
+            align-items: center;
+            height: 52px;
+            transition: var(--transition-smooth);
+        }
+        .interactive-form-grid:focus-within {
+            border-color: var(--candy-violet-accent);
+            box-shadow: 0 0 12px rgba(189, 115, 255, 0.15);
+        }
+        
+        .input-placeholder-field {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            padding: 0 18px;
+            color: var(--text-main);
+            font-size: 14px;
+            font-family: monospace;
+        }
+        .input-placeholder-field::placeholder { color: var(--text-muted); opacity: 0.4; }
+
+        .action-submit-btn {
+            background: var(--candy-violet-grad);
+            border: none;
+            height: 100%;
+            padding: 0 24px;
+            color: #000000;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .action-submit-btn:hover:not(:disabled) { opacity: 0.95; }
+        .action-submit-btn:disabled { background: #221736; color: #574b6e; cursor: not-allowed; }
+
+        /* Drag & Drop Local Files Area Container */
+        .dropzone-file-area {
+            border: 2px dashed var(--border-glow);
+            background: rgba(21, 11, 38, 0.25);
+            border-radius: 8px;
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+        }
+        .dropzone-file-area:hover, .dropzone-file-area.drag-over { 
+            border-color: var(--candy-violet-accent); 
+            background: rgba(189, 115, 255, 0.03);
+            color: var(--text-main);
+        }
+        .dropzone-file-area span { color: var(--candy-violet-accent); font-weight: 600; }
+
+        /* Workspace Monitoring Queue Display List */
+        .queue-monitor-container { display: none; margin-top: 10px; }
+        .queue-header-line { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .clear-queue-action { background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 11px; font-weight: 600; transition: var(--transition-smooth); }
+        .clear-queue-action:hover { opacity: 0.8; }
+        .queue-ul-list { list-style: none; background: var(--input-bg); border: 1px solid var(--border-glow); border-radius: 8px; padding: 14px; max-height: 180px; overflow-y: auto; font-family: monospace; font-size: 11px; display: flex; flex-direction: column; gap: 8px; }
+        .queue-item-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-main); }
+        .queue-item-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+        /* ==========================================================================
+           RIGHT ARCHITECTURE: INDEPENDENT SCROLLABLE VIEWPORT
+           ========================================================================== */
+        .preview-matrix-viewport {
+            flex-grow: 1;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: linear-gradient(135deg, #0c061a 0%, #06030d 100%);
+            transition: var(--transition-smooth);
+        }
+        
+        .canvas-sheet-printout { 
+            background: #ffffff; 
+            color: #000000; 
+            border-radius: 12px; 
+            padding: 50px; 
+            width: 100%;
+            max-width: 850px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.4); 
+            display: none; 
+            transition: var(--transition-smooth);
+        }
+
+        /* Sheet Data Segments */
+        .file-block-segment { border-bottom: 1px solid #eef0f4; padding-bottom: 36px; margin-bottom: 36px; }
+        .file-block-segment:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .segment-top-row { border-bottom: 2px solid #000000; padding-bottom: 6px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .segment-title-text { font-weight: 800; font-size: 14px; font-family: monospace; }
+        .segment-meta-badge { font-weight: 600; font-size: 10px; text-transform: uppercase; color: #666666; }
+
+        pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
+        code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.5px; line-height: 1.6; }
+
+        /* ==========================================================================
+           OUTPUT SCHEMES & SYNTAX CONFIGURATIONS
+           ========================================================================== */
+        
+        /* 1. Normal Doc Overrides */
+        body.normal-doc-active .canvas-sheet-printout { background: #ffffff !important; }
+        body.normal-doc-active .segment-top-row { border-color: #000000 !important; color: #000000 !important; }
+        body.normal-doc-active .segment-title-text, body.normal-doc-active .segment-meta-badge { color: #000000 !important; }
+        body.normal-doc-active code, body.normal-doc-active pre, body.normal-doc-active code[class*="language-"] { color: #000000 !important; font-weight: 400 !important; }
+        body.normal-doc-active span { color: #000000 !important; font-weight: 400 !important; background: none !important; }
+
+        /* 2. IDE Screenshot Scheme Overrides */
+        body.ide-style-active .preview-matrix-viewport { background: #000000 !important; padding: 40px; }
+        body.ide-style-active .canvas-sheet-printout { 
+            background: #000000 !important; 
+            border: 1px solid var(--border-glow); 
+            box-shadow: 0 30px 70px rgba(140, 70, 255, 0.05);
+            border-radius: 8px;
+        }
+        body.ide-style-active .segment-top-row { border-color: var(--candy-violet-accent) !important; }
+        body.ide-style-active .segment-title-text { color: #ffffff !important; }
+        body.ide-style-active .segment-meta-badge { color: var(--text-muted) !important; }
+
+        /* Immersive IDE Mode Syntax Tokens coloration mapping */
+        body.ide-style-active code[class*="language-"], body.ide-style-active pre[class*="language-"] { color: #e2daeb; }
+        body.ide-style-active .token.string { color: #ca9eff; } 
+        body.ide-style-active .token.keyword { color: #df72ff; font-weight: 600; } 
+        body.ide-style-active .token.function { color: #6fa6ff; }
+        body.ide-style-active .token.number, body.ide-style-active .token.boolean { color: #ffb370; }
+        body.ide-style-active .token.operator, body.ide-style-active .token.punctuation { color: #9a8fa6; }
+        body.ide-style-active .token.property, body.ide-style-active .token.class-name { color: #ffd966; }
+
+        /* ==========================================================================
+           SYSTEM EXPORT PRINT GRAPHICS ENGINE OVERRIDES
+           ========================================================================== */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff !important; display: block; overflow: visible; height: auto; }
+            .preview-matrix-viewport { padding: 0; display: block; height: auto; overflow: visible; background: none !important; }
+            .canvas-sheet-printout { display: block !important; border: none !important; padding: 0; box-shadow: none !important; border-radius: 0; max-width: 100%; }
+            .file-block-segment { page-break-after: always; padding: 20px; border: none !important; }
+            
+            /* FORCE PURE CRYSTAL BLACK PRINTS: Overwrite any library inline-styles or subtle grays */
+            body.normal-doc-active .canvas-sheet-printout,
+            body.normal-doc-active .canvas-sheet-printout *,
+            body.normal-doc-active .file-block-segment * {
+                color: #000000 !important;
+                -webkit-text-fill-color: #000000 !important;
+                text-shadow: none !important;
+                background: transparent !important;
+                font-weight: 600 !important; /* Thickens text layout structure for matrix paper contrast */
+            }
+            body.normal-doc-active .segment-top-row {
+                border-color: #000000 !important;
+            }
+
+            /* IDE Canvas Style Screenshot print settings preserving dark engine background fields */
+            body.ide-style-active .canvas-sheet-printout { background: #000000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body.ide-style-active .canvas-sheet-printout * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            @page { margin: 15mm; size: A4; }
+        }
+    </style>
+</head>
+<body class="normal-doc-active">
+
+    <aside class="sidebar-control-panel no-print">
+        
+        <div class="mode-row-switchers">
+            <button class="doc-format-btn" data-doc-mode="normal">📄 Normal Doc</button>
+            <button class="doc-format-btn" data-doc-mode="ide">💻 IDE Format</button>
+        </div>
+
+        <div class="interactive-form-grid">
+            <input type="text" id="pdfNameInput" class="input-placeholder-field" placeholder="Filename target..." value="project_submission">
+            <button id="compileExecuteBtn" class="action-submit-btn" disabled>Compile</button>
+        </div>
+
+        <div class="dropzone-file-area" id="dropzone">
+            <input type="file" id="fileInput" multiple accept=".html,.css,.js,.py" style="display: none;">
+            Drop components here or <span>browse files</span>
+        </div>
+
+        <div class="queue-monitor-container" id="queueWrapper">
+            <div class="queue-header-line">
+                <div>Queue Size: (<span id="fileCounterText">0</span>)</div>
+                <button id="clearAllBtn" class="clear-queue-action">Clear All</button>
+            </div>
+            <ul class="queue-ul-list" id="queueUl"></ul>
+        </div>
+
+    </aside>
+
+    <main class="preview-matrix-viewport">
+        <div class="canvas-sheet-printout" id="sheetOutputMatrix"></div>
+    </main>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const queueWrapper = document.getElementById('queueWrapper');
+        const fileCounterText = document.getElementById('fileCounterText');
+        const queueUl = document.getElementById('queueUl');
+        const compileExecuteBtn = document.getElementById('compileExecuteBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const sheetOutputMatrix = document.getElementById('sheetOutputMatrix');
+        const pdfNameInput = document.getElementById('pdfNameInput');
+        
+        const docModeBtns = document.querySelectorAll('[data-doc-mode]');
+
+        let processingQueue = [];
+
+        // Dynamic State Processing Controls: Format Structural Layout Router Parameters
+        docModeBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                const mode = button.getAttribute('data-doc-mode');
+                if (mode === 'ide') {
+                    document.body.classList.add('ide-style-active');
+                    document.body.classList.remove('normal-doc-active');
+                } else {
+                    document.body.classList.add('normal-doc-active');
+                    document.body.classList.remove('ide-style-active');
+                }
+            });
+        });
+
+        // Trigger Drag & Drop Window Operations Listeners
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (event) => extractSelectedFiles(event.target.files));
+        
+        dropzone.addEventListener('dragover', (event) => { event.preventDefault(); dropzone.classList.add('drag-over'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+        dropzone.addEventListener('drop', (event) => { 
+            event.preventDefault(); 
+            dropzone.classList.remove('drag-over'); 
+            if (event.dataTransfer.files.length > 0) extractSelectedFiles(event.dataTransfer.files); 
+        });
+
+        clearAllBtn.addEventListener('click', () => { processingQueue = []; fileInput.value = ''; synchronizeWorkspaceUI(); });
+
+        async function extractSelectedFiles(fileListElements) {
+            const acceptedTypes = ['html', 'css', 'js', 'py'];
+            for (const item of Array.from(fileListElements)) {
+                const suffix = item.name.split('.').pop().toLowerCase();
+                if (acceptedTypes.includes(suffix) && !processingQueue.some(queuedFile => queuedFile.name === item.name)) {
+                    const rawText = await item.text();
+                    const cleanTextContent = removeSourceComments(rawText, suffix);
+                    processingQueue.push({ name: item.name, extension: suffix.toUpperCase(), size: item.size, payload: cleanTextContent });
+                }
+            }
+            synchronizeWorkspaceUI();
+        }
+
+        // Logic Content Filters: Discard comments safely across script environments
+        function removeSourceComments(sourceCode, fileType) {
+            if (fileType === 'py') {
+                return sourceCode.replace(/#(?!([^'"]*['"][^'"]*['"])*[^'"]*$)[^\n]*|#[^\n]*/g, '');
+            } else if (fileType === 'js' || fileType === 'css' || fileType === 'html') {
+                return sourceCode.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1');
+            }
+            return sourceCode;
+        }
+
+        function synchronizeWorkspaceUI() {
+            if (processingQueue.length > 0) {
+                fileCounterText.textContent = processingQueue.length;
+                queueUl.innerHTML = processingQueue.map(item => `<li class="queue-item-row"><span>📄 ${item.name}</span> <span style="color:var(--text-muted); opacity: 0.75;">${(item.size/1024).toFixed(1)} KB</span></li>`).join('');
+                
+                queueWrapper.style.display = "block";
+                sheetOutputMatrix.style.display = "block";
+                compileExecuteBtn.disabled = false;
+
+                // Build Canvas Render Sheets Segment Elements
+                sheetOutputMatrix.innerHTML = processingQueue.map(item => {
+                    const renderingLang = queryTokenMapping(item.extension);
+                    return `
+                        <div class="file-block-segment">
+                            <div class="segment-top-row">
+                                <span class="segment-title-text">File: ${item.name}</span>
+                                <span class="segment-meta-badge">${item.extension} Output</span>
+                            </div>
+                            <pre class="language-${renderingLang}"><code>${sanitizeHtmlOutput(item.payload)}</code></pre>
+                        </div>
+                    `;
+                }).join('');
+
+                if(typeof Prism !== 'undefined') { Prism.highlightAllUnder(sheetOutputMatrix); }
+            } else {
+                queueWrapper.style.display = "none";
+                sheetOutputMatrix.style.display = "none";
+                compileExecuteBtn.disabled = true;
+                sheetOutputMatrix.innerHTML = '';
+            }
+        }
+
+        function queryTokenMapping(extType) {
+            switch(extType) {
+                case 'PY': return 'python';
+                case 'CSS': return 'css';
+                case 'HTML': return 'html';
+                case 'JS': return 'javascript';
+                default: return 'none';
+            }
+        }
+
+        function sanitizeHtmlOutput(textRaw) {
+            return textRaw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Trigger Complete File Build System Request Pipeline Execution
+        compileExecuteBtn.addEventListener('click', () => { 
+            const exportTitle = pdfNameInput.value.trim() || "project_submission";
+            document.title = exportTitle;
+            window.print(); 
+        });
+    </script>
+</body>
+</html>
